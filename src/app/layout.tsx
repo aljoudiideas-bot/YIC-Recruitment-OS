@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   description: "Operational Recruitment Execution System",
   manifest: "/manifest.json",
   icons: [
-    { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
-    { url: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
+    { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
   ],
   appleWebApp: {
     capable: true,
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="theme-color" content="#2563eb" />
-        <link rel="apple-touch-icon" href="/icons/icon-512x512.svg" />
+        <link rel="apple-touch-icon" href="/icons/icon-512x512.png" />
       </head>
       <body className="min-h-screen bg-gray-50">
         {children}
