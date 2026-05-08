@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { Header } from "@/components/layout/header"
+import { SidebarProvider } from "@/lib/sidebar-context"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -27,14 +28,16 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <AppSidebar user={profile} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header user={profile} />
-        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-          {children}
-        </main>
+    <SidebarProvider>
+      <div className="flex h-screen bg-gray-50">
+        <AppSidebar user={profile} />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header user={profile} />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }

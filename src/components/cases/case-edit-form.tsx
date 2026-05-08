@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -40,17 +40,46 @@ interface CaseEditFormProps {
     expected_arrival: string | null
     actual_arrival: string | null
     notes: string | null
+    worker_type_id: string | null
+    intermediary_id: string | null
     candidates: { full_name: string; nationality: string; passport_number: string } | null
     clients: { company_name: string } | null
     agencies: { agency_name: string; country: string } | null
   }
+  workerTypes: { id: string; name_ar: string; name_en: string }[]
+  intermediaries: { id: string; name: string }[]
 }
 
-export function CaseEditForm({ caseData }: CaseEditFormProps) {
+export function CaseEditForm({ caseData, workerTypes, intermediaries }: CaseEditFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [stage, setStage] = useState(caseData.current_stage)
   const [status, setStatus] = useState(caseData.status)
+  const [workerTypeId, setWorkerTypeId] = useState(caseData.worker_type_id ?? "")
+  const [intermediaryId, setIntermediaryId] = useState(caseData.intermediary_id ?? "")
+  const [commission, setCommission] = useState<{
+    agency_pays_us: number
+    client_pays_us: number
+    intermediary_fee: number
+  } | null>(null)
+
+  useEffect(() => {
+    if (workerTypeId && caseData.clients?.company_name && caseData.agencies?.agency_name) {
+      fetchCommission(workerTypeId, intermediaryId)
+    }
+  }, [workerTypeId, intermediaryId])
+
+  async function fetchCommission(wtId: string, intId: string) {
+    if (!wtId) { setCommission(null); return }
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("commission_rules")
+      .select("agency_pays_us, client_pays_us, intermediary_fee")
+      .eq("worker_type_id", wtId)
+      .eq("intermediary_id", intId || "00000000-0000-0000-0000-000000000000")
+      .maybeSingle()
+    setCommission(data ?? null)
+  }
 
   const currentIndex = STAGES.findIndex((s) => s.value === stage)
 
@@ -80,6 +109,8 @@ export function CaseEditForm({ caseData }: CaseEditFormProps) {
       expected_arrival: (formData.get("expected_arrival") as string) || null,
       actual_arrival: (formData.get("actual_arrival") as string) || null,
       notes: formData.get("notes") || null,
+      worker_type_id: workerTypeId || null,
+      intermediary_id: intermediaryId || null,
     }
 
     const { error } = await supabase.from("cases").update(payload).eq("id", caseData.id)
@@ -125,6 +156,57 @@ export function CaseEditForm({ caseData }: CaseEditFormProps) {
             <p className="font-mono text-xs">{caseData.candidates?.passport_number}</p>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white rounded-xl border p-5 space-y-4">
+        <h2 className="font-semibold text-gray-900">Commission Info</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Worker Type</label>
+            <select
+              value={workerTypeId}
+              onChange={(e) => setWorkerTypeId(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            >
+              <option value="">Not set</option>
+              {workerTypes.map((wt) => (
+                <option key={wt.id} value={wt.id}>{wt.name_en} ({wt.name_ar})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Intermediary</label>
+            <select
+              value={intermediaryId}
+              onChange={(e) => setIntermediaryId(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            >
+              <option value="">None</option>
+              {intermediaries.map((i) => (
+                <option key={i.id} value={i.id}>{i.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {commission && (
+          <div className="grid gap-3 rounded-lg bg-gray-50 p-3 sm:grid-cols-3">
+            <div>
+              <span className="text-xs text-gray-500">Agency Pays Us</span>
+              <p className="text-sm font-semibold text-emerald-600">${commission.agency_pays_us}</p>
+            </div>
+            <div>
+              <span className="text-xs text-gray-500">Client Pays Us</span>
+              <p className="text-sm font-semibold text-blue-600">${commission.client_pays_us}</p>
+            </div>
+            <div>
+              <span className="text-xs text-gray-500">Intermediary Fee</span>
+              <p className="text-sm font-semibold text-orange-600">${commission.intermediary_fee}</p>
+            </div>
+          </div>
+        )}
+        {!commission && workerTypeId && (
+          <p className="text-xs text-amber-600">No commission rule matches this combination. Configure rules in commission matrix.</p>
+        )}
       </div>
 
       <div className="bg-white rounded-xl border p-5 space-y-4">
