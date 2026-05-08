@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, TrendingUp, TrendingDown, Pencil } from "lucide-react"
+import { Plus, TrendingUp, TrendingDown, Pencil, DollarSign } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 
@@ -37,6 +37,16 @@ export default async function FinancePage() {
     `)
     .order("transaction_date", { ascending: false })
     .limit(50)
+
+  const { data: commissionRules } = await supabase
+    .from("commission_rules")
+    .select(`
+      agency_pays_us,
+      client_pays_us,
+      intermediary_fee,
+      worker_types (name_en, name_ar)
+    `)
+    .limit(20)
 
   const txnList = transactions ?? []
   const totalRevenue = txnList
@@ -107,6 +117,50 @@ export default async function FinancePage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Commission Matrix</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="pb-2 text-left font-medium text-gray-500">Worker Type</th>
+                  <th className="pb-2 text-left font-medium text-gray-500">Agency Pays Us</th>
+                  <th className="pb-2 text-left font-medium text-gray-500">Client Pays Us</th>
+                  <th className="pb-2 text-left font-medium text-gray-500">Intermediary Fee</th>
+                  <th className="pb-2 text-left font-medium text-gray-500">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {(commissionRules ?? []).map((r: Record<string, unknown>, i: number) => {
+                  const wt = r.worker_types as { name_en: string; name_ar: string } | null
+                  return (
+                    <tr key={i} className="hover:bg-gray-50">
+                      <td className="py-2.5 font-medium">{wt?.name_en ?? "—"}</td>
+                      <td className="py-2.5 text-emerald-600">{formatCurrency(Number(r.agency_pays_us))}</td>
+                      <td className="py-2.5 text-blue-600">{formatCurrency(Number(r.client_pays_us))}</td>
+                      <td className="py-2.5 text-orange-600">{formatCurrency(Number(r.intermediary_fee))}</td>
+                      <td className="py-2.5 font-semibold">
+                        {formatCurrency(Number(r.agency_pays_us) + Number(r.client_pays_us) - Number(r.intermediary_fee))}
+                      </td>
+                    </tr>
+                  )
+                })}
+                {(commissionRules ?? []).length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-sm text-gray-500">
+                      No commission rules configured. Add rules to auto-calculate profits.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -6,10 +6,12 @@ import { ArrowLeft } from "lucide-react"
 export default async function NewCasePage() {
   const supabase = await createClient()
 
-  const [{ data: candidates }, { data: clients }, { data: agencies }] = await Promise.all([
+  const [{ data: candidates }, { data: clients }, { data: agencies }, { data: workerTypes }, { data: intermediaries }] = await Promise.all([
     supabase.from("candidates").select("id, full_name, nationality, job_role").order("full_name"),
     supabase.from("clients").select("id, company_name").eq("status", "active").order("company_name"),
     supabase.from("agencies").select("id, agency_name, country").eq("status", "active").order("agency_name"),
+    supabase.from("worker_types").select("id, name_ar, name_en").order("name_en"),
+    supabase.from("intermediaries").select("id, name").order("name"),
   ])
 
   return (
@@ -27,6 +29,8 @@ export default async function NewCasePage() {
           candidates={candidates ?? []}
           clients={clients ?? []}
           agencies={agencies ?? []}
+          workerTypes={workerTypes ?? []}
+          intermediaries={intermediaries ?? []}
         />
       </div>
     </div>

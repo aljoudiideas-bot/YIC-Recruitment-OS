@@ -119,11 +119,42 @@ export interface RecruitmentCase {
   status: CaseStatus
   assignedTo: string | null
   notes: string | null
+  workerTypeId: string | null
+  intermediaryId: string | null
   createdAt: string
   updatedAt: string
   candidate?: Candidate
   client?: Client
   agency?: Agency
+  worker_type?: WorkerType
+  intermediary?: Intermediary
+}
+
+export interface WorkerType {
+  id: string
+  tenantId: string
+  nameAr: string
+  nameEn: string
+  createdAt: string
+}
+
+export interface Intermediary {
+  id: string
+  tenantId: string
+  name: string
+  createdAt: string
+}
+
+export interface CommissionRule {
+  id: string
+  tenantId: string
+  workerTypeId: string
+  externalAgencyId: string | null
+  saudiClientId: string | null
+  intermediaryId: string | null
+  agencyPaysUs: number
+  clientPaysUs: number
+  intermediaryFee: number
 }
 
 export interface Document {
