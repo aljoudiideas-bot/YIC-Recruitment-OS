@@ -32,6 +32,7 @@ interface CandidatesTableProps {
     current_status: string
     created_at: string
     agencies: { agency_name: string } | null
+    client: { company_name: string } | null
   }[]
 }
 
@@ -62,6 +63,7 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
               <th className="px-4 py-3 text-left font-medium text-gray-500">Nationality</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Passport</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Job Role</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Client</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Agency</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Medical</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Status</th>
@@ -76,6 +78,7 @@ export function CandidatesTable({ candidates }: CandidatesTableProps) {
                 <td className="px-4 py-3 text-gray-600">{c.nationality}</td>
                 <td className="px-4 py-3 font-mono text-xs text-gray-600">{c.passport_number}</td>
                 <td className="px-4 py-3 text-gray-700">{c.job_role}</td>
+                <td className="px-4 py-3 text-gray-600">{c.client?.company_name ?? "—"}</td>
                 <td className="px-4 py-3 text-gray-600">{c.agencies?.agency_name ?? "—"}</td>
                 <td className="px-4 py-3">
                   <Badge variant={medicalColors[c.medical_status] ?? "gray"}>

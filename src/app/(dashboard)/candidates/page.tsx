@@ -19,14 +19,24 @@ export default async function CandidatesPage() {
       medical_status,
       current_status,
       created_at,
-      agencies (agency_name)
+      agencies (agency_name),
+      cases (
+        clients (company_name)
+      )
     `)
     .order("created_at", { ascending: false })
 
-  const normalizedCandidates = (candidates ?? []).map((c) => ({
-    ...c,
-    agencies: Array.isArray(c.agencies) ? c.agencies[0] ?? null : c.agencies,
-  }))
+  const normalizedCandidates = (candidates ?? []).map((c) => {
+    const casesArr = Array.isArray(c.cases) ? c.cases : []
+    const clientArr = casesArr.map((ca: { clients: unknown }) =>
+      Array.isArray(ca.clients) ? ca.clients[0] : ca.clients
+    ).filter(Boolean)
+    return {
+      ...c,
+      agencies: Array.isArray(c.agencies) ? c.agencies[0] ?? null : c.agencies,
+      client: clientArr[0] as { company_name: string } | null ?? null,
+    }
+  })
 
   return (
     <div className="space-y-6">
