@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { NewCaseForm } from "@/components/cases/new-case-form"
 import { getServerT } from "@/lib/i18n/server"
@@ -5,6 +6,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 export default async function NewCasePage() {
+  noStore()
   const t = await getServerT()
   const supabase = await createClient()
 

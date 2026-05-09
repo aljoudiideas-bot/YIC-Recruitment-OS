@@ -29,15 +29,20 @@ interface CandidateFormProps {
 export function CandidateForm({ candidate, client }: CandidateFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [tenantId, setTenantId] = useState<string | null>(null)
   const [agencies, setAgencies] = useState<{ id: string; agency_name: string }[]>([])
 
   useEffect(() => {
-    const fetchAgencies = async () => {
-      const supabase = createClient()
-      const { data } = await supabase.from("agencies").select("id, agency_name")
-      if (data) setAgencies(data)
-    }
-    fetchAgencies()
+    const supabase = createClient()
+    ;(async () => {
+      const { data: agenciesData } = await supabase.from("agencies").select("id, agency_name")
+      if (agenciesData) setAgencies(agenciesData)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).single()
+        if (profile) setTenantId(profile.tenant_id)
+      }
+    })()
   }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -62,6 +67,10 @@ export function CandidateForm({ candidate, client }: CandidateFormProps) {
       agency_id: agencyId === "" ? null : agencyId,
       medical_status: formData.get("medical_status") || "not_started",
       current_status: formData.get("current_status") || "new",
+    }
+
+    if (!candidate && tenantId) {
+      ;(payload as Record<string, unknown>).tenant_id = tenantId
     }
 
     const { error } = candidate
