@@ -155,16 +155,20 @@ Currency:    Multi-currency (USD primary, stored per transaction)
 | # | العنصر | الحالة | ملاحظات |
 |---|--------|--------|---------|
 | O1 | Supabase project | ⏳ User setup | إنشاء مشروع Supabase وتطبيق migration |
-| O2 | Supabase Storage buckets | ⏳ Pending | إنشاء bucket للـ documents |
+| O2 | Supabase Storage buckets | ⏳ User setup | إنشاء bucket للـ documents في Supabase Dashboard |
 | O3 | Email provider | ⏳ Pending | Resend/SendGrid للإشعارات |
-| O4 | New Candidate form | ⏳ Pending | صفحة إنشاء مرشح جديد |
-| O5 | New Client/Agency forms | ⏳ Pending | صفحات CRUD كاملة |
-| O6 | Document upload handler | ⏳ Pending | رفع ملفات لـ Supabase Storage |
-| O7 | Case stage transition UI | ⏳ Pending | سحب وإفلات بين المراحل |
-| O8 | Transaction form | ⏳ Pending | إضافة معاملات مالية |
-| O9 | Task create/edit form | ⏳ Pending | نموذج إنشاء وتعديل المهام |
-| O10 | Real-time subscriptions | ⏳ Pending | Supabase Realtime للتنبيهات |
-| O11 | Deploy target | ⏳ Pending | Vercel recommended |
+| O4 | New Candidate form | ✅ Complete | موجود في candidates/new + candidate-form |
+| O5 | New Client/Agency forms | ✅ Complete | client-form + agency-form كاملتين |
+| O6 | Document upload handler | ✅ Complete | رفع لـ Supabase Storage مع progress bar |
+| O7 | Case stage transition UI | ✅ Complete | في case-edit-form مع progress picker |
+| O8 | Transaction form | ✅ Complete | transaction-form مع ربط بالحالات |
+| O9 | Task create/edit form | ✅ Complete | task-form مع ربط بالحالات والمستخدمين |
+| O10 | Commission-to-Transaction link | ✅ Complete | ربط العمولات بالمعاملات المالية تلقائياً عند إنشاء/تعديل الحالة |
+| O11 | Commission Rules CRUD UI | ✅ Complete | صفحة إدارة قواعد العمولات (إضافة/تعديل/حذف) مع ربط بالشريط الجانبي |
+| O12 | Real-time notification hook | ✅ Complete | use-realtime-notifications hook للتنبيهات المباشرة |
+| O13 | Vercel deployment config | ✅ Complete | vercel.json جاهز للنشر |
+| O14 | Real-time subscriptions | ✅ Complete | مفعّل على جدول notifications |
+| O15 | Email notification API | ✅ Complete | API route + email service (يحتاج RESEND_API_KEY) |
 
 ---
 

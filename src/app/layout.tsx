@@ -1,6 +1,9 @@
 import "./globals.css"
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 import { PwaRegister } from "@/components/pwa-register"
+import { I18nProvider } from "@/lib/i18n/context"
+import type { Locale } from "@/lib/i18n/context"
 
 export const metadata: Metadata = {
   title: "YIC Recruitment OS",
@@ -20,20 +23,26 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = await cookies()
+  const locale = (cookieStore.get("locale")?.value || "en") as Locale
+  const dir = locale === "ar" ? "rtl" : "ltr"
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={dir}>
       <head>
         <meta name="theme-color" content="#2563eb" />
         <link rel="apple-touch-icon" href="/icons/icon-512x512.png" />
       </head>
-      <body className="min-h-screen bg-gray-50">
-        {children}
-        <PwaRegister />
+      <body className="min-h-screen bg-gray-50" style={{ direction: dir }}>
+        <I18nProvider locale={locale}>
+          {children}
+          <PwaRegister />
+        </I18nProvider>
       </body>
     </html>
   )

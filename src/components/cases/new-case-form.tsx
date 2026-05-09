@@ -85,26 +85,68 @@ export function NewCaseForm({ candidates, clients, agencies, workerTypes, interm
 
     const supabase = createClient()
 
-    const { error: insertError } = await supabase.from("cases").insert({
-      candidate_id: formData.get("candidate_id"),
-      client_id: formData.get("client_id"),
-      agency_id: formData.get("agency_id"),
-      current_stage: formData.get("current_stage") || "new_request",
-      priority: formData.get("priority") || "normal",
-      expected_arrival: formData.get("expected_arrival") || null,
-      status: "active",
-      notes: formData.get("notes") || null,
-      worker_type_id: formData.get("worker_type_id") || null,
-      intermediary_id: formData.get("intermediary_id") || null,
-    })
-
-    setLoading(false)
+    const { data: newCase, error: insertError } = await supabase
+      .from("cases")
+      .insert({
+        candidate_id: formData.get("candidate_id"),
+        client_id: formData.get("client_id"),
+        agency_id: formData.get("agency_id"),
+        current_stage: formData.get("current_stage") || "new_request",
+        priority: formData.get("priority") || "normal",
+        expected_arrival: formData.get("expected_arrival") || null,
+        status: "active",
+        notes: formData.get("notes") || null,
+        worker_type_id: formData.get("worker_type_id") || null,
+        intermediary_id: formData.get("intermediary_id") || null,
+      })
+      .select("id, case_number")
+      .single()
 
     if (insertError) {
       setError(insertError.message)
+      setLoading(false)
       return
     }
 
+    if (commission && newCase) {
+      const today = new Date().toISOString().split("T")[0]
+      const autoTransactions = []
+      if (commission.client_pays_us > 0) {
+        autoTransactions.push({
+          case_id: newCase.id,
+          transaction_type: "client_payment",
+          amount: commission.client_pays_us,
+          currency: "USD",
+          description: `Auto: Client payment - ${newCase.case_number}`,
+          transaction_date: today,
+        })
+      }
+      if (commission.agency_pays_us > 0) {
+        autoTransactions.push({
+          case_id: newCase.id,
+          transaction_type: "client_payment",
+          amount: commission.agency_pays_us,
+          currency: "USD",
+          description: `Auto: Agency payment - ${newCase.case_number}`,
+          transaction_date: today,
+        })
+      }
+      if (commission.intermediary_fee > 0) {
+        autoTransactions.push({
+          case_id: newCase.id,
+          transaction_type: "operational_cost",
+          amount: commission.intermediary_fee,
+          currency: "USD",
+          description: `Auto: Intermediary fee - ${newCase.case_number}`,
+          transaction_date: today,
+        })
+      }
+      if (autoTransactions.length > 0) {
+        await supabase.from("financial_transactions").insert(autoTransactions)
+      }
+    }
+
+    setLoading(false)
     router.push("/cases")
     router.refresh()
   }

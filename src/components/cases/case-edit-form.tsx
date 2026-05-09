@@ -42,6 +42,8 @@ interface CaseEditFormProps {
     notes: string | null
     worker_type_id: string | null
     intermediary_id: string | null
+    client_id: string | null
+    agency_id: string | null
     candidates: { full_name: string; nationality: string; passport_number: string } | null
     clients: { company_name: string } | null
     agencies: { agency_name: string; country: string } | null
@@ -64,18 +66,20 @@ export function CaseEditForm({ caseData, workerTypes, intermediaries }: CaseEdit
   } | null>(null)
 
   useEffect(() => {
-    if (workerTypeId && caseData.clients?.company_name && caseData.agencies?.agency_name) {
-      fetchCommission(workerTypeId, intermediaryId)
+    if (workerTypeId && caseData.client_id && caseData.agency_id) {
+      fetchCommission(workerTypeId, intermediaryId, caseData.client_id, caseData.agency_id)
     }
   }, [workerTypeId, intermediaryId])
 
-  async function fetchCommission(wtId: string, intId: string) {
-    if (!wtId) { setCommission(null); return }
+  async function fetchCommission(wtId: string, intId: string, clientId: string, agencyId: string) {
+    if (!wtId || !clientId || !agencyId) { setCommission(null); return }
     const supabase = createClient()
     const { data } = await supabase
       .from("commission_rules")
       .select("agency_pays_us, client_pays_us, intermediary_fee")
       .eq("worker_type_id", wtId)
+      .eq("external_agency_id", agencyId)
+      .eq("saudi_client_id", clientId)
       .eq("intermediary_id", intId || "00000000-0000-0000-0000-000000000000")
       .maybeSingle()
     setCommission(data ?? null)
@@ -115,13 +119,60 @@ export function CaseEditForm({ caseData, workerTypes, intermediaries }: CaseEdit
 
     const { error } = await supabase.from("cases").update(payload).eq("id", caseData.id)
 
-    setLoading(false)
-
     if (error) {
       alert("Error: " + error.message)
-    } else {
-      router.push("/cases")
+      setLoading(false)
+      return
     }
+
+    // Delete old auto-generated transactions for this case
+    await supabase
+      .from("financial_transactions")
+      .delete()
+      .eq("case_id", caseData.id)
+      .ilike("description", "Auto:%")
+
+    // Create new auto-generated transactions based on current commission
+    if (commission) {
+      const today = new Date().toISOString().split("T")[0]
+      const autoTransactions = []
+      if (commission.client_pays_us > 0) {
+        autoTransactions.push({
+          case_id: caseData.id,
+          transaction_type: "client_payment",
+          amount: commission.client_pays_us,
+          currency: "USD",
+          description: `Auto: Client payment - ${caseData.case_number}`,
+          transaction_date: today,
+        })
+      }
+      if (commission.agency_pays_us > 0) {
+        autoTransactions.push({
+          case_id: caseData.id,
+          transaction_type: "client_payment",
+          amount: commission.agency_pays_us,
+          currency: "USD",
+          description: `Auto: Agency payment - ${caseData.case_number}`,
+          transaction_date: today,
+        })
+      }
+      if (commission.intermediary_fee > 0) {
+        autoTransactions.push({
+          case_id: caseData.id,
+          transaction_type: "operational_cost",
+          amount: commission.intermediary_fee,
+          currency: "USD",
+          description: `Auto: Intermediary fee - ${caseData.case_number}`,
+          transaction_date: today,
+        })
+      }
+      if (autoTransactions.length > 0) {
+        await supabase.from("financial_transactions").insert(autoTransactions)
+      }
+    }
+
+    setLoading(false)
+    router.push("/cases")
   }
 
   return (

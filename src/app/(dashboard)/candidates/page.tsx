@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { CandidatesTable } from "@/components/candidates/candidates-table"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { getServerT } from "@/lib/i18n/server"
 import Link from "next/link"
 
 export default async function CandidatesPage() {

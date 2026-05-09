@@ -2,31 +2,22 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { cn, ROLE_LABELS } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { useSidebar } from "@/lib/sidebar-context"
-import { X } from "lucide-react"
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
-  Building2,
-  Globe,
-  FileText,
-  DollarSign,
-  CheckSquare,
-  Settings,
-} from "lucide-react"
+import { useT } from "@/lib/i18n/context"
+import { X, LayoutDashboard, FolderKanban, Users, Building2, Globe, FileText, DollarSign, CheckSquare, Settings, Percent } from "lucide-react"
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Cases", href: "/cases", icon: FolderKanban },
-  { name: "Candidates", href: "/candidates", icon: Users },
-  { name: "Clients", href: "/clients", icon: Building2 },
-  { name: "Agencies", href: "/agencies", icon: Globe },
-  { name: "Documents", href: "/documents", icon: FileText },
-  { name: "Finance", href: "/finance", icon: DollarSign },
-  { name: "Tasks", href: "/tasks", icon: CheckSquare },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "nav.dashboard", href: "/", icon: LayoutDashboard },
+  { name: "nav.cases", href: "/cases", icon: FolderKanban },
+  { name: "nav.candidates", href: "/candidates", icon: Users },
+  { name: "nav.clients", href: "/clients", icon: Building2 },
+  { name: "nav.agencies", href: "/agencies", icon: Globe },
+  { name: "nav.documents", href: "/documents", icon: FileText },
+  { name: "nav.finance", href: "/finance", icon: DollarSign },
+  { name: "nav.commissionRules", href: "/commission-rules", icon: Percent },
+  { name: "nav.tasks", href: "/tasks", icon: CheckSquare },
+  { name: "nav.settings", href: "/settings", icon: Settings },
 ]
 
 interface AppSidebarProps {
@@ -36,6 +27,7 @@ interface AppSidebarProps {
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname()
   const { isOpen, close } = useSidebar()
+  const t = useT()
 
   return (
     <>
@@ -69,20 +61,20 @@ export function AppSidebar({ user }: AppSidebarProps) {
                     : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 )}
               >
-                <item.icon className="h-5 w-5 shrink-0" />
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
-        {user && (
-          <div className="border-t border-slate-700 px-4 py-3">
-            <p className="truncate text-sm font-medium text-slate-200">{user.fullName}</p>
-            <p className="truncate text-xs text-slate-400">
-              {ROLE_LABELS[user.role] ?? user.role}
-            </p>
-          </div>
-        )}
+              <item.icon className="h-5 w-5 shrink-0" />
+              {t(item.name)}
+            </Link>
+          )
+        })}
+      </nav>
+      {user && (
+        <div className="border-t border-slate-700 px-4 py-3">
+          <p className="truncate text-sm font-medium text-slate-200">{user.fullName}</p>
+          <p className="truncate text-xs text-slate-400">
+            {t(`roles.${user.role}`)}
+          </p>
+        </div>
+      )}
       </aside>
     </>
   )

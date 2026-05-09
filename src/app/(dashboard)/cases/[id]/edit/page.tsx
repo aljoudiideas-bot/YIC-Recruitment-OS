@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { CaseEditForm } from "@/components/cases/case-edit-form"
+import { getServerT } from "@/lib/i18n/server"
 import { notFound } from "next/navigation"
 
 export default async function EditCasePage({ params }: { params: Promise<{ id: string }> }) {

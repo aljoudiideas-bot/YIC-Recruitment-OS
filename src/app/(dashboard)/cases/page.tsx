@@ -2,9 +2,11 @@ import { createClient } from "@/lib/supabase/server"
 import { CasesTable } from "@/components/cases/cases-table"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { getServerT } from "@/lib/i18n/server"
 import Link from "next/link"
 
 export default async function CasesPage() {
+  const t = await getServerT()
   const supabase = await createClient()
 
   const { data: cases } = await supabase
@@ -34,15 +36,15 @@ export default async function CasesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Recruitment Cases</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('cases.title')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Manage end-to-end recruitment lifecycle
+            {t('cases.subtitle')}
           </p>
         </div>
         <Link href="/cases/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            New Case
+            {t('cases.newCase')}
           </Button>
         </Link>
       </div>

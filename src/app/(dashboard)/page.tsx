@@ -7,6 +7,7 @@ import { PeriodFilter } from "@/components/dashboard/period-filter"
 import { FolderKanban, DollarSign, TrendingUp, AlertTriangle, FileClock, Plane } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { formatCurrency, cn } from "@/lib/utils"
+import { getServerT } from "@/lib/i18n/server"
 
 function getDateRange(period: string) {
   const now = new Date()
@@ -51,6 +52,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const period = params.period ?? "month"
   const { start: periodStart, end: periodEnd } = getDateRange(period)
   const { start: weekStart, end: weekEnd } = getWeekRange()
+  const t = await getServerT()
 
   const supabase = await createClient()
 
@@ -148,57 +150,57 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   }))
 
   const periodLabels: Record<string, string> = {
-    week: "This Week",
-    month: "This Month",
-    quarter: "This Quarter",
-    year: "This Year",
+    week: t('dashboard.thisWeek'),
+    month: t('dashboard.thisMonth'),
+    quarter: t('dashboard.thisQuarter'),
+    year: t('dashboard.thisYear'),
   }
 
   const kpis = [
     {
-      label: "Active Cases",
+      label: t('dashboard.activeCases'),
       value: activeCasesCount ?? 0,
-      change: `${activeCasesCount ?? 0} ongoing`,
+      change: `${activeCasesCount ?? 0} ${t('dashboard.ongoing')}`,
       icon: FolderKanban,
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
-      label: `${periodLabels[period]} Revenue`,
+      label: `${periodLabels[period]} ${t('dashboard.revenue')}`,
       value: formatCurrency(totalRevenue),
-      change: `${periodPayments?.length ?? 0} payments`,
+      change: `${periodPayments?.length ?? 0} ${t('dashboard.payments')}`,
       icon: DollarSign,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
     },
     {
-      label: "Net Profit",
+      label: t('dashboard.netProfit'),
       value: formatCurrency(netProfit),
-      change: `${profitMargin}% margin`,
+      change: `${profitMargin}% ${t('dashboard.margin')}`,
       icon: TrendingUp,
       color: "text-green-600",
       bg: "bg-green-50",
     },
     {
-      label: "Delayed Cases",
+      label: t('dashboard.delayedCases'),
       value: delayedCasesCount ?? 0,
-      change: "14+ days in visa processing",
+      change: t('dashboard.delayedDesc'),
       icon: AlertTriangle,
       color: "text-red-600",
       bg: "bg-red-50",
     },
     {
-      label: "Pending Documents",
+      label: t('dashboard.pendingDocs'),
       value: pendingDocsCount ?? 0,
-      change: "Awaiting verification",
+      change: t('dashboard.pendingDocsDesc'),
       icon: FileClock,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },
     {
-      label: "Arrivals This Week",
+      label: t('dashboard.arrivalsWeek'),
       value: arrivalsWeekCount ?? 0,
-      change: `Week of ${new Date(weekStart).toLocaleDateString()}`,
+      change: `${t('dashboard.weekOf')} ${new Date(weekStart).toLocaleDateString()}`,
       icon: Plane,
       color: "text-purple-600",
       bg: "bg-purple-50",
@@ -209,9 +211,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Operational overview of recruitment activities
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <PeriodFilter />
@@ -239,7 +241,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Case Status Distribution</CardTitle>
+            <CardTitle>{t('dashboard.caseDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
             <CasesChart data={casesChartData} />
@@ -247,7 +249,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Revenue vs Costs ({periodLabels[period]})</CardTitle>
+            <CardTitle>{t('dashboard.revenueVsCosts')} ({periodLabels[period]})</CardTitle>
           </CardHeader>
           <CardContent>
             <ProfitChart revenue={totalRevenue} costs={totalCosts} payments={periodPayments?.length ?? 0} costTransactions={periodCosts?.length ?? 0} />
@@ -259,7 +261,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Active Cases</CardTitle>
+              <CardTitle>{t('dashboard.activeCasesList')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ActiveCasesTable cases={normalizedActiveCases} />

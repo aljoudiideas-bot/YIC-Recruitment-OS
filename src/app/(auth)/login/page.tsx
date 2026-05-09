@@ -3,9 +3,11 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { useT } from "@/lib/i18n/context"
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useT()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -52,9 +54,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">YIC Recruitment</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{t('app.name')}</h1>
           <p className="mt-2 text-sm text-gray-600">
-            {isLogin ? "Sign in to your account" : "Create a new account"}
+            {isLogin ? t('login.title') : t('login.signUp')}
           </p>
         </div>
 
@@ -68,7 +70,7 @@ export default function LoginPage() {
           {!isLogin && (
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-                Full Name
+                {t('common.fullName')}
               </label>
               <input
                 id="fullName"
@@ -77,14 +79,14 @@ export default function LoginPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Your full name"
+                placeholder={t('login.placeholderName')}
               />
             </div>
           )}
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
+              {t('common.email')}
             </label>
             <input
               id="email"
@@ -93,13 +95,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="you@company.com"
+              placeholder={t('login.placeholderEmail')}
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
+              {t('common.password')}
             </label>
             <input
               id="password"
@@ -108,7 +110,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Minimum 6 characters"
+              placeholder={t('login.placeholderPassword')}
               minLength={6}
             />
           </div>
@@ -118,7 +120,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            {loading ? "..." : isLogin ? "Sign In" : "Create Account"}
+            {loading ? "..." : isLogin ? t('common.signIn') : t('common.createAccount')}
           </button>
         </form>
 
@@ -128,7 +130,7 @@ export default function LoginPage() {
             onClick={() => { setIsLogin(!isLogin); setError("") }}
             className="text-sm text-blue-600 hover:underline"
           >
-            {isLogin ? "Don't have an account? Create one" : "Already have an account? Sign in"}
+            {isLogin ? t('login.noAccount') : t('login.hasAccount')}
           </button>
         </div>
       </div>

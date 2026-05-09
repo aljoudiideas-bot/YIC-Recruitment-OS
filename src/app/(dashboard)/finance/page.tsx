@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, TrendingUp, TrendingDown, Pencil, DollarSign } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { getServerT } from "@/lib/i18n/server"
 import Link from "next/link"
 
 const typeLabels: Record<string, string> = {
@@ -21,6 +22,7 @@ const typeColors: Record<string, "default" | "success" | "warning" | "danger" | 
 }
 
 export default async function FinancePage() {
+  const t = await getServerT()
   const supabase = await createClient()
 
   const { data: transactions } = await supabase
@@ -61,15 +63,15 @@ export default async function FinancePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Finance</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('finance.title')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Track revenues, costs, and profitability
+            {t('finance.subtitle')}
           </p>
         </div>
         <Button asChild>
           <Link href="/finance/new">
             <Plus className="mr-2 h-4 w-4" />
-            Add Transaction
+            {t('finance.addTransaction')}
           </Link>
         </Button>
       </div>
@@ -77,7 +79,7 @@ export default async function FinancePage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">{t('finance.totalRevenue')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -90,7 +92,7 @@ export default async function FinancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Costs</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">{t('finance.totalCosts')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -103,7 +105,7 @@ export default async function FinancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Net Profit</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">{t('finance.netProfit')}</CardTitle>
           </CardHeader>
           <CardContent>
             <span className={`text-2xl font-bold ${netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
@@ -119,8 +121,14 @@ export default async function FinancePage() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Commission Matrix</CardTitle>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/commission-rules">
+              <Pencil className="mr-1 h-3.5 w-3.5" />
+              Manage Rules
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
