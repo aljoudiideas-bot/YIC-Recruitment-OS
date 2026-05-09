@@ -23,9 +23,10 @@ interface CandidateFormProps {
     current_status: string
     photo_url: string | null
   }
+  client?: { company_name: string } | null
 }
 
-export function CandidateForm({ candidate }: CandidateFormProps) {
+export function CandidateForm({ candidate, client }: CandidateFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [agencies, setAgencies] = useState<{ id: string; agency_name: string }[]>([])
@@ -172,6 +173,13 @@ export function CandidateForm({ candidate }: CandidateFormProps) {
             />
           </div>
         </div>
+
+        {client && (
+          <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
+            <p className="text-xs text-blue-600 font-medium">Saudi Client (from latest case)</p>
+            <p className="text-sm font-semibold text-blue-800">{client.company_name}</p>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium mb-1">Sending Agency (Optional)</label>
