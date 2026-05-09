@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { ArrowLeft } from "lucide-react"
 interface CommissionRuleFormProps {
   rule?: {
     id: string
+    tenant_id?: string
     worker_type_id: string
     external_agency_id: string | null
     saudi_client_id: string | null
@@ -26,14 +27,25 @@ interface CommissionRuleFormProps {
 export function CommissionRuleForm({ rule, workerTypes, agencies, clients, intermediaries }: CommissionRuleFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [tenantId, setTenantId] = useState<string | null>(null)
   const supabase = createClient()
+
+  useEffect(() => {
+    async function fetchTenant() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).single()
+      if (data) setTenantId(data.tenant_id)
+    }
+    fetchTenant()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const payload = {
+    const payload: Record<string, unknown> = {
       worker_type_id: formData.get("worker_type_id"),
       external_agency_id: (formData.get("external_agency_id") as string) || null,
       saudi_client_id: (formData.get("saudi_client_id") as string) || null,
@@ -41,6 +53,10 @@ export function CommissionRuleForm({ rule, workerTypes, agencies, clients, inter
       agency_pays_us: parseFloat(formData.get("agency_pays_us") as string) || 0,
       client_pays_us: parseFloat(formData.get("client_pays_us") as string) || 0,
       intermediary_fee: parseFloat(formData.get("intermediary_fee") as string) || 0,
+    }
+
+    if (!rule && tenantId) {
+      payload.tenant_id = tenantId
     }
 
     const { error } = rule
