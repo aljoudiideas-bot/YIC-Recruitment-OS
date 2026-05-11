@@ -1,23 +1,41 @@
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus } from "lucide-react"
 import Link from "next/link"
 import { formatDate } from "@/lib/utils"
 
-export default async function ClientsPage() {
-  const supabase = await createClient()
+interface Client {
+  id: string
+  company_name: string
+  industry: string | null
+  contact_name: string | null
+  contact_email: string | null
+  commercial_registration: string | null
+  status: string
+  created_at: string
+}
 
-  const { data: clients } = await supabase
-    .from("clients")
-    .select("*")
-    .order("company_name")
+const statusColors: Record<string, "default" | "success" | "warning" | "danger" | "info" | "gray"> = {
+  active: "success",
+  inactive: "gray",
+  blocked: "danger",
+}
 
-  const statusColors: Record<string, "default" | "success" | "warning" | "danger" | "info" | "gray"> = {
-    active: "success",
-    inactive: "gray",
-    blocked: "danger",
-  }
+export default function ClientsPage() {
+  const [clients, setClients] = useState<Client[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from("clients").select("*").order("company_name").then(({ data }) => {
+      setClients((data ?? []) as Client[])
+      setLoading(false)
+    })
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -48,7 +66,7 @@ export default async function ClientsPage() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {clients?.map((client) => (
+            {clients.map((client) => (
               <tr key={client.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium">{client.company_name}</td>
                 <td className="px-4 py-3 text-gray-600">{client.industry ?? "—"}</td>
@@ -76,7 +94,7 @@ export default async function ClientsPage() {
             ))}
           </tbody>
         </table>
-        {(!clients || clients.length === 0) && (
+        {!loading && clients.length === 0 && (
           <div className="py-12 text-center text-sm text-gray-500">
             No clients yet. Add your first client to get started.
           </div>

@@ -1,23 +1,39 @@
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Star } from "lucide-react"
 import Link from "next/link"
-import { formatDate } from "@/lib/utils"
 
-export default async function AgenciesPage() {
-  const supabase = await createClient()
+interface Agency {
+  id: string
+  agency_name: string
+  country: string
+  commission_rate: number
+  rating: number
+  contact_email: string | null
+  status: string
+}
 
-  const { data: agencies } = await supabase
-    .from("agencies")
-    .select("*")
-    .order("agency_name")
+const statusColors: Record<string, "default" | "success" | "warning" | "danger" | "info" | "gray"> = {
+  active: "success",
+  inactive: "gray",
+  suspended: "danger",
+}
 
-  const statusColors: Record<string, "default" | "success" | "warning" | "danger" | "info" | "gray"> = {
-    active: "success",
-    inactive: "gray",
-    suspended: "danger",
-  }
+export default function AgenciesPage() {
+  const [agencies, setAgencies] = useState<Agency[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from("agencies").select("*").order("agency_name").then(({ data }) => {
+      setAgencies((data ?? []) as Agency[])
+      setLoading(false)
+    })
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -37,7 +53,7 @@ export default async function AgenciesPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {agencies?.map((agency) => (
+        {agencies.map((agency) => (
           <div key={agency.id} className="rounded-xl border bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between">
               <div>
@@ -72,7 +88,7 @@ export default async function AgenciesPage() {
           </div>
         ))}
       </div>
-      {(!agencies || agencies.length === 0) && (
+      {!loading && agencies.length === 0 && (
         <div className="rounded-xl border bg-white py-12 text-center text-sm text-gray-500">
           No agencies yet. Add your first agency partner.
         </div>
